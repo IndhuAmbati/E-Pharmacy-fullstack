@@ -1,6 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { Trash2, Minus, Plus } from "lucide-react";
 
 export interface CartItemProps {
@@ -34,7 +33,7 @@ export const CartItem = ({
       </div>
       <div className="flex-1">
         <h3 className="font-medium">{name}</h3>
-        <p className="text-sm text-gray-500">Unit Price: ${price.toFixed(2)}</p>
+        <p className="text-sm text-gray-500">Unit Price: ₹{price.toFixed(2)}</p>
       </div>
       <div className="flex items-center space-x-2">
         <Button
@@ -56,7 +55,7 @@ export const CartItem = ({
         </Button>
       </div>
       <div className="flex items-center space-x-4">
-        <p className="font-medium w-20 text-right">${(price * quantity).toFixed(2)}</p>
+        <p className="font-medium w-20 text-right">₹{(price * quantity).toFixed(2)}</p>
         <Button
           size="sm"
           variant="ghost"

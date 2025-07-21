@@ -1,70 +1,126 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Link, useNavigate } from "react-router-dom";
+export default function LoginForm() {
+  const [emailOrUsername, setEmailOrUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState("user"); // user or admin
+  const [error, setError] = useState("");
 
-export const LoginForm = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Login successful!",
-        description: "Welcome back to CureConnect.",
+    setError("");
+
+    const url =
+      role === "admin"
+        ? "http://localhost:8065/api/admin/login"
+        : "http://localhost:8065/api/users/login";
+
+    const body =
+      role === "admin"
+        ? { username: emailOrUsername, password }
+        : { email: emailOrUsername, password };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
-      navigate("/");
-      // In a real app, you would set the user state here
-    }, 1500);
+
+      if (!response.ok) {
+        throw new Error("Invalid credentials");
+      }
+
+      const data = await response.json();
+
+      if (data && data.id) {
+        const fixedUser = {
+          ...data,
+          role: data.role?.toUpperCase() === "ADMIN" ? "ADMIN" : "USER",
+        };
+        login(fixedUser, "dummy-token");
+
+        if (fixedUser.role === "ADMIN") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/medicines");
+        }
+      } else {
+        setError("Invalid login response");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Login failed. Please try again.");
+    }
   };
 
   return (
-    <div className="mx-auto max-w-md space-y-6 p-6 bg-white rounded-lg shadow-md">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Login to Your Account</h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Enter your credentials to access your account
-        </p>
-      </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" placeholder="john.doe@example.com" type="email" required />
+    <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Login</h2>
+      {error && <p className="text-red-500">{error}</p>}
+
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div className="flex gap-4">
+          <label>
+            <input
+              type="radio"
+              value="user"
+              checked={role === "user"}
+              onChange={() => setRole("user")}
+            />
+            User
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="admin"
+              checked={role === "admin"}
+              onChange={() => setRole("admin")}
+            />
+            Admin
+          </label>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" required />
+
+        <input
+          type="text"
+          placeholder={role === "admin" ? "Username" : "Email"}
+          className="w-full border px-3 py-2 rounded"
+          value={emailOrUsername}
+          onChange={(e) => setEmailOrUsername(e.target.value)}
+        />
+
+        <div>
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="w-full border px-3 py-2 rounded"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <label className="flex items-center mt-1 text-sm">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword(!showPassword)}
+              className="mr-2"
+            />
+            Show Password
+          </label>
         </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <input type="checkbox" id="remember" className="h-4 w-4 rounded border-gray-300" />
-            <Label htmlFor="remember" className="text-sm font-normal">Remember me</Label>
-          </div>
-          <Link to="/forgot-password" className="text-sm text-pharma-primary hover:underline">
-            Forgot password?
-          </Link>
-        </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Logging In..." : "Login"}
-        </Button>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded"
+        >
+          Login
+        </button>
       </form>
-      <div className="text-center text-sm">
-        Don't have an account?{" "}
-        <Link to="/register" className="text-pharma-primary hover:underline">
-          Register
-        </Link>
-      </div>
     </div>
   );
-};
-
-export default LoginForm;
+}

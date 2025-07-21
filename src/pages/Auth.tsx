@@ -1,31 +1,23 @@
-
-import { useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import LoginForm from "@/components/auth/LoginForm";
-import RegisterForm from "@/components/auth/RegisterForm";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import { RegisterForm } from "@/components/auth/RegisterForm";
 
 const Auth = () => {
   const { action } = useParams<{ action: string }>();
-  
-  // Validate action param
+
   if (action !== "login" && action !== "register") {
     return <Navigate to="/auth/login" replace />;
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      
-      <main className="flex-grow py-12 bg-gray-50">
-        <div className="container px-4 md:px-6">
-          {action === "login" ? <LoginForm /> : <RegisterForm />}
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
+    <main className="flex-grow flex items-center justify-center px-4 py-12 bg-gray-100 min-h-screen">
+      <div className="w-full max-w-md p-6 bg-white rounded-xl shadow-md">
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          {action === "login" ? "Login to your account" : "Create an account"}
+        </h1>
+        {action === "login" ? <LoginForm /> : <RegisterForm />}
+      </div>
+    </main>
   );
 };
 

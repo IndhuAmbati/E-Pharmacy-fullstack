@@ -1,7 +1,5 @@
 
 import { useState } from "react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import OrderTracking from "@/components/delivery/OrderTracking";
 import FeedbackForm from "@/components/feedback/FeedbackForm";
 
@@ -10,8 +8,7 @@ const TrackingPage = () => {
   
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
-      
+    
       <main className="flex-grow py-12 bg-gray-50">
         <div className="container px-4 md:px-6">
           <h1 className="text-3xl font-bold mb-6">Order Tracking</h1>
@@ -23,7 +20,6 @@ const TrackingPage = () => {
         </div>
       </main>
       
-      <Footer />
     </div>
   );
 };
